@@ -1,0 +1,46 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{title}} · SmartSchedule</title><link rel="stylesheet" href="{{url_for('static',filename='style.css')}}?v=115"></head>
+<body><div class="layout"><aside><a class="brand" href="/home?shift={{active_shift}}"><span class="mark">S</span><span>SmartSchedule<small>умное расписание</small></span></a>
+<div class="shiftbox"><small>АКТИВНАЯ СМЕНА</small><div class="shifts"><a class="{{'active' if active_shift=='1'}}" href="/set-shift/1?next={{ request.path }}">1</a><a class="{{'active' if active_shift=='2'}}" href="/set-shift/2?next={{ request.path }}">2</a></div><div class="shift-hint">Переключается для составителя, учителя и ученика</div></div>
+<nav>{% if role=="teacher" %}<a class="{{'active' if request.path=='/my-day'}}" href="/my-day?shift={{active_shift}}"><i>◷</i>Мой день</a>{% endif %}{% if role=="student" %}<a class="{{'active' if request.path=='/student'}}" href="/student?shift={{active_shift}}"><i>▥</i>Мой класс</a>{% endif %}{% for label,path,icon in nav %}{% if role=="composer" or (role=="teacher" and path in ["/schedule","/check","/help"]) or (role=="student" and path in ["/help"]) %}<a class="{{'active' if request.path==path}}" href="{{path}}?shift={{active_shift}}"><i>{{icon}}</i>{{label}}</a>{% endif %}{% endfor %}</nav>
+<div class="notify-settings"><div class="notify-settings-title">🔔 Уведомления</div><div id="notify-state" class="notify-state">Проверяем…</div><button type="button" id="notify-toggle" class="btn light notify-toggle">Включить</button><div class="notify-settings-hint">Можно отключить звук на устройстве — SmartSchedule само звуков не включает.</div></div><div class="aside-note">Центральная школьная система<br>Общие данные для всех устройств</div></aside>
+<main><div class="top"><div><div class="crumb">SMARTSCHEDULE · СМЕНА {{active_shift}}</div><h1>{{title}}</h1></div><div class="top-actions">{% if role=="teacher" %}<span class="rolechip">Учитель · {{teacher_name}}</span>{% elif role=="composer" %}<span class="rolechip">Составитель</span>{% elif role=="student" %}<span class="rolechip">Ученик · {{session.get("student_class","")}}</span>{% endif %}{% if role=="student" %}<a class="btn light topbtn" href="/student?shift={{active_shift}}">Мой класс</a>{% else %}<a class="btn light topbtn" href="/schedule?shift={{active_shift}}">Открыть расписание</a>{% endif %}<a class="btn light" href="/logout">Выйти</a></div></div>{% block content %}{% endblock %}</main>
+</div><div id="sync-status" class="sync-status">● Синхронизация</div>
+<div id="notify-bar" class="notify-bar" style="display:none"><span>🔔 Уведомления об изменениях расписания</span><button type="button" id="enable-notify" class="btn light">Включить</button></div>
+<script>
+(function(){
+  const key="smartschedule_notify";
+  const canNotify=("Notification" in window);
+  const state=document.getElementById("notify-state");
+  const toggle=document.getElementById("notify-toggle");
+  const bar=document.getElementById("notify-bar"), btn=document.getElementById("enable-notify");
+  function enabled(){ return localStorage.getItem(key)==="on" && canNotify && Notification.permission==='granted'; }
+  function render(){
+    const on=enabled();
+    if(state) state.textContent=!canNotify ? "Браузер не поддерживает" : (Notification.permission==='denied' ? "Запрещены в браузере" : (on ? "Включены" : "Выключены"));
+    if(toggle){ toggle.textContent=on ? "Выключить" : "Включить"; toggle.classList.toggle('alt',!on); }
+    if(bar) bar.style.display=(canNotify && !on && Notification.permission!=='denied') ? 'flex' : 'none';
+  }
+  async function turnOn(){
+    if(!canNotify) return render();
+    try{
+      const p=Notification.permission==='granted' ? 'granted' : await Notification.requestPermission();
+      if(p==='granted'){
+        localStorage.setItem(key,'on');
+        try{new Notification('SmartSchedule',{body:'Уведомления об изменениях расписания включены.',silent:true});}catch(e){}
+      } else localStorage.setItem(key,'off');
+    }catch(e){ localStorage.setItem(key,'off'); }
+    render();
+  }
+  function turnOff(){ localStorage.setItem(key,'off'); render(); }
+  if(toggle) toggle.addEventListener('click',()=> enabled() ? turnOff() : turnOn());
+  if(btn) btn.addEventListener('click',turnOn);
+  render();
+  async function sync(){try{const x=await fetch('/api/revision',{cache:'no-store'});const y=await x.json();return Number(y.revision||0);}catch(e){return null;}}
+  (async function(){const first=await sync();let last=first;setInterval(async()=>{const now=await sync();if(now!==null && last!==null && now!==last){
+      last=now;
+      if(enabled()){try{new Notification('SmartSchedule: расписание изменено',{body:'Составитель или педагог изменил данные расписания.',silent:true});}catch(e){}}
+      if(!document.querySelector('form:focus-within')) location.reload();
+    } else if(now!==null){last=now;}},5000);})();
+})();
+</script></body></html>

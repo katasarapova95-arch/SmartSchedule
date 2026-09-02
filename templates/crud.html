@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% block content %}
+<div class="card info">Добавляй объекты по одному. После сохранения запись можно открыть кнопкой «Редактировать» и изменить без удаления.{% if key=="subjects" %}<br><br><b>Совмещённые уроки:</b> по умолчанию один учитель не может вести два класса одновременно. Если урок действительно совмещённый, укажи в поле «Совмещённые классы» оба класса через запятую, например <b>5А, 5Б</b>.{% endif %}</div>
+<form class="card form" method="post"><div class="formgrid">
+{% for f,l,t in fields %}
+{% if t=='wishes' %}
+<label style="grid-column:1/-1"><b>Готовые пожелания</b><span class="muted" style="display:block;margin-top:4px">Выбери подходящие пункты — генератор будет учитывать их как пожелания. Обязательные правила имеют приоритет.</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:10px">
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="no_first"> Очень важно: не ставить первым уроком</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="no_last"> Не ставить последним уроком</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="no_two_consecutive"> Не ставить два урока подряд</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="max_one_window"> Желательно не более одного окна</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="prefer_midday"> Предпочтительно не крайние уроки</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="avoid_monday"> По возможности без уроков в понедельник</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="avoid_saturday"> По возможности без уроков в субботу</label>
+</div>
+<div style="margin-top:10px"><span style="font-weight:600">Общая важность пожеланий:</span> <select name="wish_priority" style="margin-left:8px"><option value="1">Обычное</option><option value="2">Важно</option><option value="3">Очень важно</option></select></div>
+<div style="margin-top:10px"><span style="font-weight:600">Другое:</span><textarea name="wishes" placeholder="Например: желательно распределить уроки равномерно по неделе"></textarea></div>
+</label>
+{% elif t=='textarea' %}<label>{{l}}<textarea name="{{f}}"></textarea></label>
+{% elif t=='difficulty' %}<label>{{l}}<select name="{{f}}"><option value="1">1 — лёгкий</option><option value="2" selected>2 — средний</option><option value="3">3 — сложный</option></select></label>
+{% elif t=='checkbox' %}<label>{{l}}<input name="{{f}}" type="checkbox"></label>
+{% else %}<label>{{l}}<input name="{{f}}" type="{{t}}"></label>{% endif %}
+{% endfor %}</div><button class="btn">＋ Добавить</button></form>
+<div class="section">Список</div><div class="tablebox"><table><tr>{% for f,l,t in fields %}<th>{{l}}</th>{% endfor %}<th>Действия</th></tr>{% for x in items %}<tr>{% for f,l,t in fields %}<td>{% if t=='wishes' %}{% set wo=x.get('wish_options',{}) or {} %}{% if wo.get('no_first') %}Не первым; {% endif %}{% if wo.get('no_last') %}Не последним; {% endif %}{% if wo.get('no_two_consecutive') %}Не подряд; {% endif %}{% if wo.get('max_one_window') %}≤1 окно; {% endif %}{% if wo.get('prefer_midday') %}Не крайние; {% endif %}{% if wo.get('avoid_monday') %}Без пн; {% endif %}{% if wo.get('avoid_saturday') %}Без сб; {% endif %}{{x.get('wishes','')}}{% else %}{{x.get(f,'')}}{% endif %}</td>{% endfor %}<td class="actions-cell"><a class="btn light" href="/edit/{{key}}/{{x.id}}?shift={{active_shift}}">Редактировать</a><form method="post" action="/delete/{{key}}/{{x.id}}?shift={{active_shift}}"><button class="btn light">Удалить</button></form></td></tr>{% else %}<tr><td colspan="{{fields|length+1}}" class="muted">Пока нет записей.</td></tr>{% endfor %}</table></div>
+{% endblock %}

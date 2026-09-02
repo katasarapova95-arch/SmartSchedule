@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block content %}
+{% if key=="subjects" %}<div class="card info"><b>Совмещённый урок:</b> оставь поле пустым, если учитель не должен вести два класса одновременно. Для разрешённого совмещения укажи оба класса, например <b>5А, 5Б</b>.</div>{% endif %}
+<form class="card form" method="post"><div class="formgrid">
+{% for f,l,t in fields %}
+{% if t=='wishes' %}{% set wo=item.get('wish_options',{}) or {} %}
+<label style="grid-column:1/-1"><b>Готовые пожелания</b><span class="muted" style="display:block;margin-top:4px">Выбери подходящие пункты. Генератор будет стараться их выполнить, но обязательные правила имеют приоритет.</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:10px">
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="no_first" {% if wo.get('no_first') %}checked{% endif %}> Очень важно: не ставить первым уроком</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="no_last" {% if wo.get('no_last') %}checked{% endif %}> Не ставить последним уроком</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="no_two_consecutive" {% if wo.get('no_two_consecutive') %}checked{% endif %}> Не ставить два урока подряд</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="max_one_window" {% if wo.get('max_one_window') %}checked{% endif %}> Желательно не более одного окна</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="prefer_midday" {% if wo.get('prefer_midday') %}checked{% endif %}> Предпочтительно не крайние уроки</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="avoid_monday" {% if wo.get('avoid_monday') %}checked{% endif %}> По возможности без уроков в понедельник</label>
+<label style="padding:10px;border:1px solid #ddd;border-radius:12px"><input type="checkbox" name="avoid_saturday" {% if wo.get('avoid_saturday') %}checked{% endif %}> По возможности без уроков в субботу</label>
+</div>
+<div style="margin-top:10px"><span style="font-weight:600">Общая важность пожеланий:</span> <select name="wish_priority" style="margin-left:8px"><option value="1" {% if item.get('wish_priority',1)|string=='1' %}selected{% endif %}>Обычное</option><option value="2" {% if item.get('wish_priority',1)|string=='2' %}selected{% endif %}>Важно</option><option value="3" {% if item.get('wish_priority',1)|string=='3' %}selected{% endif %}>Очень важно</option></select></div>
+<div style="margin-top:10px"><span style="font-weight:600">Другое:</span><textarea name="wishes" placeholder="Например: желательно распределить уроки равномерно по неделе">{{item.get('wishes','')}}</textarea></div>
+</label>
+{% elif t=='textarea' %}<label>{{l}}<textarea name="{{f}}">{{item.get(f,'')}}</textarea></label>
+{% elif t=='difficulty' %}<label>{{l}}<select name="{{f}}"><option value="1" {% if item.get(f)|string=='1' %}selected{% endif %}>1 — лёгкий</option><option value="2" {% if item.get(f)|string=='2' %}selected{% endif %}>2 — средний</option><option value="3" {% if item.get(f)|string=='3' %}selected{% endif %}>3 — сложный</option></select></label>
+{% elif t=='shift' %}<label>{{l}}<select name="{{f}}"><option value="1" {% if item.get('shift','1')=='1' %}selected{% endif %}>1 смена</option><option value="2" {% if item.get('shift')=='2' %}selected{% endif %}>2 смена</option></select></label>
+{% elif t=='checkbox' %}<label>{{l}}<input name="{{f}}" type="checkbox" {% if item.get(f) %}checked{% endif %}></label>
+{% else %}<label>{{l}}<input name="{{f}}" type="{{t}}" value="{{item.get(f,'')}}"></label>{% endif %}
+{% endfor %}</div><div class="actions"><button class="btn">Сохранить изменения</button><a class="btn light" href="/{{key}}?shift={{active_shift}}">Отмена</a></div></form>{% endblock %}

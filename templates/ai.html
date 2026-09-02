@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block content %}
+<div class="card form">
+  <div class="eyebrow">ПОМОЩНИК SMARTSCHEDULE</div>
+  <h3>AI-чат</h3>
+  <p class="muted">Можно написать свой вопрос вручную. Но если не хочется ничего печатать — просто нажми на готовый вопрос ниже.</p>
+  <form method="post"><textarea name="question" placeholder="Например: почему у 7А появилось окно?"></textarea><button class="btn">✦ Спросить</button></form>
+</div>
+
+<div class="section">Популярные вопросы</div>
+<div class="faq-grid">
+{% for q in faq_questions %}
+  <form method="post" class="faq-form">
+    <input type="hidden" name="question" value="{{q}}">
+    <button class="faq-btn" type="submit"><span>?</span><strong>{{q}}</strong></button>
+  </form>
+{% endfor %}
+</div>
+
+{% if history %}<div class="section">История разговора</div>{% endif %}
+{% for x in history %}<div class="bubble user"><b>Вы:</b> {{x.q}}</div><div class="bubble"><b>AI:</b> {{x.a}}</div>{% endfor %}
+{% endblock %}

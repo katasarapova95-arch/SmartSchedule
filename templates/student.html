@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}
+<div class="pagehead"><div><div class="eyebrow">ЛИЧНЫЙ ПРОСМОТР</div><h1>Расписание {{class_name}}</h1><p class="muted">Только просмотр · смена {{active_shift}}</p></div><a class="btn alt" href="/logout">Выйти</a></div>
+{% if missing or not r %}<div class="card"><h3>Расписание пока не создано</h3><p class="muted">Составитель ещё не создал расписание для выбранного класса.</p></div>{% else %}
+<div class="card info"><b>{{class_name}}</b> · Здесь отображаются только уроки вашего класса. Редактирование недоступно.</div>
+{% for day in d.school.days %}<div class="day"><div class="daytitle">{{day}}</div><div class="schedulebox"><table class="schedule"><tr><th class="time">Время</th><th>Предмет</th><th>Учитель</th><th>Каб.</th></tr>
+{% for i,t in enumerate(r.times) %}{% set v=r.grid.get(day,{}).get(i|string,{}).get(class_name,{}) %}<tr><td class="time"><b>{{i+1}}</b><br>{{t}}</td>{% if v %}<td><div class="lesson"><strong>{{v.subject}}</strong></div></td><td>{{v.teacher}}</td><td><span class="cab">{{v.room|room_short}}</span></td>{% else %}<td class="empty">—</td><td class="empty">—</td><td class="empty">—</td>{% endif %}</tr>{% endfor %}</table></div></div>{% endfor %}{% endif %}
+{% endblock %}

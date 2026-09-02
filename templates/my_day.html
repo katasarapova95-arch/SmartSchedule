@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block content %}
+<div class="pagehead"><div><div class="eyebrow">ЛИЧНЫЙ КАБИНЕТ</div><h1>Мой день</h1><p class="muted">{{teacher}} · {{today}}</p></div><a class="btn alt" href="/schedule?shift={{active_shift}}">Открыть всю сетку</a></div>
+{% if not r %}<div class="card"><h3>Расписание ещё не создано</h3><p class="muted">Когда составитель создаст расписание, здесь появятся ваши уроки.</p></div>{% elif today=="Воскресенье" %}<div class="card"><h3>Сегодня выходной</h3><p class="muted">На сегодня уроков по расписанию нет.</p></div>{% elif not lessons %}<div class="card"><h3>Сегодня уроков нет</h3><p class="muted">Для выбранной смены у вас сегодня нет назначенных уроков.</p></div>{% else %}
+<div class="stats"><div class="card"><div class="muted">Сегодня уроков</div><div class="big">{{lessons|length}}</div></div><div class="card"><div class="muted">Вы вошли как</div><div class="big smallbig">Учитель</div></div></div>
+<div class="card"><h3>Ваши уроки сегодня</h3><div class="teacher-day-list">{% for x in lessons %}<div class="teacher-day-row"><div class="teacher-time"><b>{{x.slot}}</b><span>{{x.time}}</span></div><div class="teacher-lesson"><strong>{{x.subject}}</strong><span>{{x.class_name}}</span></div><div class="teacher-room"><span class="muted">Кабинет</span><b>{{x.room|room_short}}</b></div></div>{% endfor %}</div></div>
+{% endif %}
+<div class="card info"><b>Что можно изменить:</b> только кабинет у своих уроков. Если кабинет нужно поменять, откройте «Расписание» и измените его в нужной строке.</div>
+{% endblock %}

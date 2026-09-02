@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}
+<section class="hero"><div><div class="eyebrow">УМНОЕ РАСПИСАНИЕ</div><h2>Школа без хаоса.<br>Расписание с логикой.</h2><p>Классы, параллели, учителя, предметы, кабинеты, подгруппы и правила — в одной системе.</p>
+<div class="actions"><a class="btn" href="/generate?shift={{active_shift}}">✦ Сгенерировать</a><a class="btn alt" href="/ai?shift={{active_shift}}">✦ AI-чат</a></div></div>
+<div class="hero-side"><b>Быстрый старт</b><p>01 · школа</p><p>02 · классы</p><p>03 · учителя и кабинеты</p><p>04 · предметы и часы</p><p>05 · генерация</p><p>06 · скачать XLSX</p></div></section>
+<div class="stats">{% for k,l in [('classes','Классы'),('teachers','Учителя'),('subjects','Предметы'),('rooms','Кабинеты'),('subgroups','Подгруппы'),('extras','Дополнительные')] %}<div class="stat"><b>{{counts[k]}}</b><span>{{l}}</span></div>{% endfor %}</div>
+<div class="section">Состояние</div><div class="card"><b class="big">{{filled}}</b> заполненных занятий. Данные хранятся централизованно: изменения видны всем устройствам после синхронизации.</div>
+{% endblock %}
