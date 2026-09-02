@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: smartschedule
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /home
+    envVars:
+      - key: SMARTSCHEDULE_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
